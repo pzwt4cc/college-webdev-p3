@@ -1,0 +1,51 @@
+.heroView {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1rem;
+    border: 2px solid var(--main-text-color);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+    transition: box-shadow 0.2s ease-in-out;
+}
+
+.heroView:hover {
+    box-shadow: 0 0 10px white;
+    cursor: pointer;
+}
+
+.heroName {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--main-text-color);
+    border-bottom: 2px solid var(--main-text-color);
+}
+
+.heroStats {
+    font-weight: bold;
+    font-family: cursive;
+}
+
+.hpBar {
+    margin: 10px;
+    width: 200px;
+    height: 14px;
+    background: var(--main-bar-bg-color, #333);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.hpBarFill {
+    height: 100%;
+    background: var(--main-bar-color, green);
+    transition: width 0.3s;
+}
+
+.heroImg {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+}

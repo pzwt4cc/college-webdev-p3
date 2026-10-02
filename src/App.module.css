@@ -1,0 +1,54 @@
+.arena {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    gap: 2rem;
+}
+
+.resultLabel {
+    padding: 1rem 2rem;
+    color: var(--main-text-color);
+    font-weight: bold;
+    font-size: 2rem;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(15px);
+}
+
+.heroZone {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: clamp(1rem, 8vw, 10rem);
+}
+
+.remoteZone {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+}
+
+.atkBtn {
+    padding: 1rem 2rem;
+    min-width: 200px;
+    color: var(--main-text-color);
+    background-color: var(--main-accent-color);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.1s ease-in-out;
+    cursor: pointer;
+}
+
+.atkBtn:hover {
+    box-shadow: 0 0 10px var(--main-accent-color);
+    transform: translateY(-5px);
+}
+
+.atkBtn:active {
+    transform: scale(0.9);
+    transform: translateY(5px);
+}

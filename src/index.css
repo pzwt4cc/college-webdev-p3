@@ -1,0 +1,23 @@
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --main-bar-color: green;
+    --main-bar-bg-color: #333;
+    --main-text-color: antiquewhite;
+    --main-accent-color: rosybrown;
+}
+
+body {
+    margin: 0;
+    background: url("./assets/img/bg.png");
+    background-color: gray;
+    background-blend-mode: multiply;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    font-family: sans-serif;
+    font-size: 1rem;
+}
