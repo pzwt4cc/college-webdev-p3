@@ -7,13 +7,21 @@ import styles from "./App.module.css";
 
 function App() {
   const [fighters, setFighters] = useState([
-    { id: 1, name: "Kafka", img: kafkaImg, defaultHP: 100, damageHP: 100 },
+    {
+      id: 1,
+      name: "Kafka",
+      img: kafkaImg,
+      defaultHP: 100,
+      damageHP: 100,
+      changeHP: changeHP,
+    },
     {
       id: 2,
       name: "Castorice",
       img: castoriceImg,
       defaultHP: 100,
       damageHP: 100,
+      changeHP: changeHP,
     },
   ]);
 
@@ -23,11 +31,18 @@ function App() {
 
   function kick(max) {
     setFighters(
-      fighters.map((f) => ({
-        ...f,
-        damageHP: Math.max(0, f.damageHP - random(max)),
-      })),
+      fighters.map((f) => {
+        const updateFighters = { ...f };
+        updateFighters.changeHP(random(max));
+
+        return updateFighters;
+      }),
     );
+  }
+
+  function changeHP(count) {
+    console.log(`Damage for ${this.name}: ${count}`);
+    this.damageHP = Math.max(0, this.damageHP - count);
   }
 
   const [hero, enemy] = fighters;
