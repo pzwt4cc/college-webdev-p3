@@ -52,3 +52,10 @@
     transform: scale(0.9);
     transform: translateY(5px);
 }
+
+.logs {
+    margin-top: 20px;
+    max-height: 250px;
+    overflow-y: auto;
+    color: #fff;
+}

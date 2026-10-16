@@ -5,6 +5,15 @@ import castoriceImg from "./assets/img/Castorice.png";
 import "./reset.css";
 import styles from "./App.module.css";
 
+function changeHP(count) {
+  console.log(`Damage for ${this.name}: ${count}`);
+  this.damageHP = Math.max(0, this.damageHP - count);
+}
+
+function random(max) {
+  return Math.ceil(Math.random() * max);
+}
+
 function App() {
   const [fighters, setFighters] = useState([
     {
@@ -13,7 +22,7 @@ function App() {
       img: kafkaImg,
       defaultHP: 100,
       damageHP: 100,
-      changeHP: changeHP,
+      changeHP,
     },
     {
       id: 2,
@@ -21,36 +30,44 @@ function App() {
       img: castoriceImg,
       defaultHP: 100,
       damageHP: 100,
-      changeHP: changeHP,
+      changeHP,
     },
   ]);
-
-  function random(max) {
-    return Math.ceil(Math.random() * max);
-  }
+  const [logs, setLogs] = useState([]);
 
   function kick(max) {
-    setFighters(
-      fighters.map((f) => {
-        const updateFighters = { ...f };
-        updateFighters.changeHP(random(max));
+    const roundLogs = [];
 
-        return updateFighters;
-      }),
-    );
-  }
+    const updated = fighters.map((f) => {
+      const fighter = { ...f };
+      const { name } = fighter;
+      const hpBefore = fighter.damageHP;
 
-  function changeHP(count) {
-    console.log(`Damage for ${this.name}: ${count}`);
-    this.damageHP = Math.max(0, this.damageHP - count);
+      fighter.changeHP(random(max));
+
+      const { damageHP } = fighter;
+      const loss = hpBefore - damageHP;
+
+      roundLogs.push({
+        id: crypto.randomUUID(),
+        text: `${name} втратив ${loss} HP, залишилось життів: ${damageHP}`,
+      });
+
+      return fighter;
+    });
+
+    setFighters(updated);
+    setLogs([...roundLogs].reverse().concat(logs));
   }
 
   const [hero, enemy] = fighters;
+  const { name: heroName, damageHP: heroHP } = hero;
+  const { name: enemyName, damageHP: enemyHP } = enemy;
 
   let result = "";
-  if (hero.damageHP === 0 && enemy.damageHP === 0) result = "Draw";
-  else if (enemy.damageHP === 0) result = hero.name + " Won";
-  else if (hero.damageHP === 0) result = enemy.name + " Won";
+  if (heroHP === 0 && enemyHP === 0) result = "Draw";
+  else if (enemyHP === 0) result = heroName + " Won";
+  else if (heroHP === 0) result = enemyName + " Won";
 
   return (
     <div className={styles.arena}>
@@ -75,6 +92,11 @@ function App() {
         >
           Skill Strike
         </button>
+      </div>
+      <div id="logs" className={styles.logs}>
+        {logs.map(({ id, text }) => (
+          <p key={id}>{text}</p>
+        ))}
       </div>
     </div>
   );

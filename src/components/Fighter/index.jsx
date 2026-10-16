@@ -1,22 +1,22 @@
 import styles from "./Fighter.module.css";
 
-function Fighter({ hero }) {
+function Fighter({ hero: { name, img, damageHP, defaultHP } }) {
   let color = "green";
 
-  if (hero.damageHP <= 50) color = "orange";
-  if (hero.damageHP <= 20) color = "red";
+  if (damageHP <= 50) color = "orange";
+  if (damageHP <= 20) color = "red";
 
   return (
     <div className={styles.heroView}>
-      <h1 className={styles.heroName}>{hero.name}</h1>
-      <img className={styles.heroImg} src={hero.img} alt={hero.name} />
+      <h1 className={styles.heroName}>{name}</h1>
+      <img className={styles.heroImg} src={img} alt={name} />
       <p className={styles.heroStats}>
-        {hero.damageHP} / {hero.defaultHP}
+        {damageHP} / {defaultHP}
       </p>
       <div className={styles.hpBar}>
         <div
           className={styles.hpBarFill}
-          style={{ width: hero.damageHP + "%", background: color }}
+          style={{ width: damageHP + "%", background: color }}
         />
       </div>
     </div>
