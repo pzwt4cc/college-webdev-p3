@@ -34,16 +34,19 @@ function App() {
     },
   ]);
   const [logs, setLogs] = useState([]);
+  const [countLeftDef, setCountLeftDef] = useState(10);
+  const [countLeftHight, setCountLeftHight] = useState(10);
 
-  function kick(max) {
+  function handleNormalAttack() {
+    if (countLeftDef <= 0) return;
+
     const roundLogs = [];
-
     const updated = fighters.map((f) => {
       const fighter = { ...f };
       const { name } = fighter;
       const hpBefore = fighter.damageHP;
 
-      fighter.changeHP(random(max));
+      fighter.changeHP(random(20));
 
       const { damageHP } = fighter;
       const loss = hpBefore - damageHP;
@@ -57,7 +60,35 @@ function App() {
     });
 
     setFighters(updated);
-    setLogs([...roundLogs].reverse().concat(logs));
+    setLogs([...logs, ...roundLogs]);
+    setCountLeftDef((prev) => prev - 1);
+  }
+
+  function handleSkillAttack() {
+    if (countLeftHight <= 0) return;
+
+    const roundLogs = [];
+    const updated = fighters.map((f) => {
+      const fighter = { ...f };
+      const { name } = fighter;
+      const hpBefore = fighter.damageHP;
+
+      fighter.changeHP(random(40));
+
+      const { damageHP } = fighter;
+      const loss = hpBefore - damageHP;
+
+      roundLogs.push({
+        id: crypto.randomUUID(),
+        text: `${name} втратив ${loss} HP, залишилось життів: ${damageHP}`,
+      });
+
+      return fighter;
+    });
+
+    setFighters(updated);
+    setLogs([...logs, ...roundLogs]);
+    setCountLeftHight((prev) => prev - 1);
   }
 
   const [hero, enemy] = fighters;
@@ -80,17 +111,17 @@ function App() {
       <div className={styles.remoteZone}>
         <button
           className={styles.atkBtn}
-          disabled={result !== ""}
-          onClick={() => kick(20)}
+          disabled={result !== "" || countLeftDef === 0}
+          onClick={handleNormalAttack}
         >
-          Normal Attack
+          Normal Attack ({countLeftDef})
         </button>
         <button
           className={styles.atkBtn}
-          disabled={result !== ""}
-          onClick={() => kick(40)}
+          disabled={result !== "" || countLeftHight === 0}
+          onClick={handleSkillAttack}
         >
-          Skill Strike
+          Skill Strike ({countLeftHight})
         </button>
       </div>
       <div id="logs" className={styles.logs}>
