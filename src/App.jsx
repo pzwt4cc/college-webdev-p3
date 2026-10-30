@@ -1,133 +1,120 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Fighter from "./components/Fighter";
-import kafkaImg from "./assets/img/Kafka.png";
-import castoriceImg from "./assets/img/Castorice.png";
+import { ALL_FIGHTERS } from "./data/all_fighters";
 import "./reset.css";
 import styles from "./App.module.css";
-
-function changeHP(count) {
-  console.log(`Damage for ${this.name}: ${count}`);
-  this.damageHP = Math.max(0, this.damageHP - count);
-}
 
 function random(max) {
   return Math.ceil(Math.random() * max);
 }
 
+function getRandomFighters() {
+  const shuffled = [...ALL_FIGHTERS].sort(() => 0.5 - Math.random());
+  return [
+    { ...shuffled[0], counts: [10, 10, 10], damageHP: shuffled[0].defaultHP },
+    { ...shuffled[1], counts: [10, 10, 10], damageHP: shuffled[1].defaultHP },
+  ];
+}
+
 function App() {
-  const [fighters, setFighters] = useState([
-    {
-      id: 1,
-      name: "Kafka",
-      img: kafkaImg,
-      defaultHP: 100,
-      damageHP: 100,
-      changeHP,
-    },
-    {
-      id: 2,
-      name: "Castorice",
-      img: castoriceImg,
-      defaultHP: 100,
-      damageHP: 100,
-      changeHP,
-    },
-  ]);
+  const [fighters, setFighters] = useState(getRandomFighters);
   const [logs, setLogs] = useState([]);
-  const [countLeftDef, setCountLeftDef] = useState(10);
-  const [countLeftHight, setCountLeftHight] = useState(10);
+  const [turn, setTurn] = useState(0);
 
-  function handleNormalAttack() {
-    if (countLeftDef <= 0) return;
+  const logsEndRef = useRef(null);
 
-    const roundLogs = [];
-    const updated = fighters.map((f) => {
-      const fighter = { ...f };
-      const { name } = fighter;
-      const hpBefore = fighter.damageHP;
+  useEffect(() => {
+    logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [logs]);
 
-      fighter.changeHP(random(20));
-
-      const { damageHP } = fighter;
-      const loss = hpBefore - damageHP;
-
-      roundLogs.push({
-        id: crypto.randomUUID(),
-        text: `${name} втратив ${loss} HP, залишилось життів: ${damageHP}`,
-      });
-
-      return fighter;
-    });
-
-    setFighters(updated);
-    setLogs([...logs, ...roundLogs]);
-    setCountLeftDef((prev) => prev - 1);
-  }
-
-  function handleSkillAttack() {
-    if (countLeftHight <= 0) return;
-
-    const roundLogs = [];
-    const updated = fighters.map((f) => {
-      const fighter = { ...f };
-      const { name } = fighter;
-      const hpBefore = fighter.damageHP;
-
-      fighter.changeHP(random(40));
-
-      const { damageHP } = fighter;
-      const loss = hpBefore - damageHP;
-
-      roundLogs.push({
-        id: crypto.randomUUID(),
-        text: `${name} втратив ${loss} HP, залишилось життів: ${damageHP}`,
-      });
-
-      return fighter;
-    });
-
-    setFighters(updated);
-    setLogs([...logs, ...roundLogs]);
-    setCountLeftHight((prev) => prev - 1);
-  }
-
-  const [hero, enemy] = fighters;
-  const { name: heroName, damageHP: heroHP } = hero;
-  const { name: enemyName, damageHP: enemyHP } = enemy;
+  const hero = fighters[0];
+  const enemy = fighters[1];
 
   let result = "";
-  if (heroHP === 0 && enemyHP === 0) result = "Draw";
-  else if (enemyHP === 0) result = heroName + " Won";
-  else if (heroHP === 0) result = enemyName + " Won";
+  if (hero.damageHP === 0 && enemy.damageHP === 0) result = "Draw";
+  else if (enemy.damageHP === 0) result = hero.name + " Won";
+  else if (hero.damageHP === 0) result = enemy.name + " Won";
+
+  function handleAttack(fighterIndex, attackIndex) {
+    if (turn !== fighterIndex) return;
+
+    const activeFighter = fighters[fighterIndex];
+    if (activeFighter.counts[attackIndex] <= 0) return;
+
+    const attackObj = activeFighter.attacks[attackIndex];
+    const roundLogs = [];
+
+    const updated = fighters.map((f, index) => {
+      const fighter = { ...f };
+
+      if (index === fighterIndex) {
+        fighter.counts = [...fighter.counts];
+        fighter.counts[attackIndex] -= 1;
+      } else {
+        const hpBefore = fighter.damageHP;
+        fighter.changeHP(random(attackObj.maxDamage));
+        const loss = hpBefore - fighter.damageHP;
+
+        roundLogs.push({
+          id: crypto.randomUUID(),
+          text: `${activeFighter.name}: used "${attackObj.name}" vs ${fighter.name}! Lost ${loss} HP (left: ${fighter.damageHP})`,
+        });
+      }
+
+      return fighter;
+    });
+
+    setFighters(updated);
+    setLogs([...logs, ...roundLogs]);
+    setTurn((prev) => (prev === 0 ? 1 : 0));
+  }
+
+  function handleReset() {
+    setFighters(getRandomFighters());
+    setLogs([]);
+    setTurn(0);
+  }
 
   return (
     <div className={styles.arena}>
-      {result && <h2 className={styles.resultLabel}>{result}</h2>}
+      {result && (
+        <div className={styles.winnerContainer}>
+          <h2 className={styles.resultLabel}>{result}</h2>
+          <button className={styles.atkBtn} onClick={handleReset}>
+            New Battle
+          </button>
+        </div>
+      )}
+
       <div className={styles.heroZone}>
-        {fighters.map((f) => (
-          <Fighter key={f.id} hero={f} />
+        {fighters.map((f, fighterIndex) => (
+          <div key={f.id} className={styles.fighterWrapper}>
+            <Fighter hero={f} />
+            <div className={styles.fighterRemoteZone}>
+              {f.attacks.map((atk, attackIndex) => (
+                <button
+                  key={atk.id}
+                  className={styles.atkBtn}
+                  disabled={
+                    result !== "" ||
+                    f.counts[attackIndex] === 0 ||
+                    turn !== fighterIndex
+                  }
+                  onClick={() => handleAttack(fighterIndex, attackIndex)}
+                >
+                  {atk.name} ({f.counts[attackIndex]})
+                </button>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
-      <div className={styles.remoteZone}>
-        <button
-          className={styles.atkBtn}
-          disabled={result !== "" || countLeftDef === 0}
-          onClick={handleNormalAttack}
-        >
-          Normal Attack ({countLeftDef})
-        </button>
-        <button
-          className={styles.atkBtn}
-          disabled={result !== "" || countLeftHight === 0}
-          onClick={handleSkillAttack}
-        >
-          Skill Strike ({countLeftHight})
-        </button>
-      </div>
-      <div id="logs" className={styles.logs}>
+
+      <div className={styles.logs}>
         {logs.map(({ id, text }) => (
           <p key={id}>{text}</p>
         ))}
+        <div ref={logsEndRef} />
       </div>
     </div>
   );
